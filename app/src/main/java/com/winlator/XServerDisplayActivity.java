@@ -595,7 +595,12 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         capturePointerOnExternalMouse = preferences.getBoolean("capture_pointer_on_external_mouse", true);
         touchpadView = new TouchpadView(this, xServer, capturePointerOnExternalMouse);
         touchpadView.setSensitivity(globalCursorSpeed);
-        touchpadView.setMoveCursorToTouchpoint(preferences.getBoolean("move_cursor_to_touchpoint", false));
+        boolean moveCursorToTouchpoint = preferences.getBoolean("move_cursor_to_touchpoint", false);
+        if (shortcut != null) {
+            String extra = shortcut.getExtra("moveCursorToTouchpoint", "");
+            if (!extra.isEmpty()) moveCursorToTouchpoint = extra.equals("1");
+        }
+        touchpadView.setMoveCursorToTouchpoint(moveCursorToTouchpoint);
         touchpadView.setFourFingersTapCallback(() -> {
             if (!drawerLayout.isDrawerOpen(GravityCompat.START)) drawerLayout.openDrawer(GravityCompat.START);
         });
@@ -659,6 +664,9 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         final CheckBox cbShowTouchscreenControls = dialog.findViewById(R.id.CBShowTouchscreenControls);
         cbShowTouchscreenControls.setChecked(inputControlsView.isShowTouchscreenControls());
 
+        final CheckBox cbMoveCursorToTouchpoint = dialog.findViewById(R.id.CBMoveCursorToTouchpoint);
+        cbMoveCursorToTouchpoint.setChecked(touchpadView.isMoveCursorToTouchpoint());
+
         dialog.findViewById(R.id.BTSettings).setOnClickListener((v) -> {
             int position = sProfile.getSelectedItemPosition();
             Intent intent = new Intent(this, MainActivity.class);
@@ -673,6 +681,9 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         });
 
         dialog.setOnConfirmCallback(() -> {
+            boolean moveCursorToTouchpoint = cbMoveCursorToTouchpoint.isChecked();
+            touchpadView.setMoveCursorToTouchpoint(moveCursorToTouchpoint);
+
             xServer.setRelativeMouseMovement(cbRelativeMouseMovement.isChecked());
             inputControlsView.setShowTouchscreenControls(cbShowTouchscreenControls.isChecked());
             int position = sProfile.getSelectedItemPosition();

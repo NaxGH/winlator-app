@@ -1,6 +1,7 @@
 package com.winlator.contentdialog;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -9,6 +10,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.Spinner;
+
+import androidx.preference.PreferenceManager;
 
 import com.winlator.ContainerDetailFragment;
 import com.winlator.R;
@@ -82,6 +85,12 @@ public class ShortcutSettingsDialog extends ContentDialog {
         final CheckBox cbForceFullscreen = findViewById(R.id.CBForceFullscreen);
         cbForceFullscreen.setChecked(shortcut.getExtra("forceFullscreen", "0").equals("1"));
 
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        final boolean globalMoveCursorToTouchpoint = prefs.getBoolean("move_cursor_to_touchpoint", false);
+        final CheckBox cbMoveCursorToTouchpoint = findViewById(R.id.CBMoveCursorToTouchpoint);
+        String savedTouch = shortcut.getExtra("moveCursorToTouchpoint", globalMoveCursorToTouchpoint ? "1" : "0");
+        cbMoveCursorToTouchpoint.setChecked(savedTouch.equals("1"));
+
         final Spinner sBox64Preset = findViewById(R.id.SBox64Preset);
         Box64PresetManager.loadSpinner(sBox64Preset, shortcut.getExtra("box64Preset", shortcut.container.getBox64Preset()));
 
@@ -149,6 +158,7 @@ public class ShortcutSettingsDialog extends ContentDialog {
             shortcut.putExtra("audioDriver", !audioDriver.equals(shortcut.container.getAudioDriver())? audioDriver : null);
             shortcut.putExtra("audioDriverConfig", !audioDriverConfig.equals(shortcut.container.getAudioDriverConfig()) ? audioDriverConfig : null);
             shortcut.putExtra("forceFullscreen", cbForceFullscreen.isChecked() ? "1" : null);
+            shortcut.putExtra("moveCursorToTouchpoint", cbMoveCursorToTouchpoint.isChecked() ? "1" : "0");
 
             String wincomponents = ContainerDetailFragment.getWinComponents(getContentView());
             shortcut.putExtra("wincomponents", !wincomponents.equals(shortcut.container.getWinComponents()) ? wincomponents : null);
