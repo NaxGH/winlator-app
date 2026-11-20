@@ -159,7 +159,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (itemId == R.id.menu_item_add ||
             itemId == R.id.menu_item_home ||
             itemId == R.id.menu_item_view_style ||
-            itemId == R.id.menu_item_new_folder) {
+            itemId == R.id.menu_item_new_folder ||
+            itemId == R.id.menu_item_import_save) {
             return super.onOptionsItemSelected(menuItem);
         }
         else {
@@ -196,6 +197,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.menu_item_input_controls:
                 showFragment(new InputControlsFragment(selectedProfileId));
+                break;
+            case R.id.menu_item_saves:
+                showFragment(new SavesFragment());
                 break;
             case R.id.menu_item_settings:
                 showFragment(new SettingsFragment());
