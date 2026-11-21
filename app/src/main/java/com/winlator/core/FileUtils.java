@@ -276,12 +276,21 @@ public abstract class FileUtils {
     }
 
     public static String getFilePathFromUri(Uri uri) {
-        String path = null;
-        if (uri.getAuthority().equals("com.android.externalstorage.documents")) {
-            String[] parts = uri.getLastPathSegment().split(":");
-            if (parts[0].equalsIgnoreCase("primary")) path = Environment.getExternalStorageDirectory() + "/" + parts[1];
-        }
-        return path;
+        if (uri == null || !"com.android.externalstorage.documents".equals(uri.getAuthority())) return null;
+
+        String segment = uri.getLastPathSegment();
+        if (segment == null) return null;
+
+        int index = segment.indexOf(':');
+        String volume = index != -1 ? segment.substring(0, index) : segment;
+        String relative = index != -1 ? segment.substring(index + 1) : "";
+
+        File base = volume.equalsIgnoreCase("primary")
+                ? Environment.getExternalStorageDirectory()
+                : new File("/storage/" + volume); // SD card or USB volume
+        if (!base.isDirectory()) return null;
+
+        return relative.isEmpty() ? base.getPath() : new File(base, relative).getPath();
     }
 
     public static boolean contentEquals(File origin, File target) {
