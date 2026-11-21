@@ -173,12 +173,18 @@ public abstract class FileUtils {
             File parent = dstFile.getParentFile();
             if (!srcFile.exists() || (parent != null && !parent.exists() && !parent.mkdirs())) return false;
 
-            try {
-                FileChannel inChannel = (new FileInputStream(srcFile)).getChannel();
-                FileChannel outChannel = (new FileOutputStream(dstFile)).getChannel();
-                inChannel.transferTo(0, inChannel.size(), outChannel);
-                inChannel.close();
-                outChannel.close();
+            try (FileInputStream inStream = new FileInputStream(srcFile);
+                 FileOutputStream outStream = new FileOutputStream(dstFile);
+                 FileChannel inChannel = inStream.getChannel();
+                 FileChannel outChannel = outStream.getChannel()) {
+
+                final long size = inChannel.size();
+                long position = 0;
+                while (position < size) {
+                    long transferred = inChannel.transferTo(position, size - position, outChannel);
+                    if (transferred <= 0) return false;
+                    position += transferred;
+                }
 
                 if (callback != null) callback.call(dstFile);
                 return dstFile.exists();
